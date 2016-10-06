@@ -9,6 +9,13 @@
 
 namespace cipd {
 
+class PureDataPrintReceiver : public pd::PdReceiver {
+
+public:
+	void print(const std::string& message) override;
+};
+
+
 typedef std::shared_ptr<pd::Patch> PatchRef;
 typedef std::shared_ptr<class PureDataNode> PureDataNodeRef;
 
@@ -19,9 +26,11 @@ public:
 
 	void initialize() override;
 	void uninitialize() override;
-	void process( ci::audio::Buffer *buffer );
+	void process( ci::audio::Buffer *buffer ) override;
 
 	pd::PdBase& getPd()	{ return mPdBase; }
+
+	void		addToPath( cinder::fs::path path );
 
 	PatchRef	loadPatch( ci::DataSourceRef dataSource );
 	void		closePatch( const PatchRef &patch );
@@ -43,6 +52,9 @@ private:
 	size_t		mNumTicksPerBlock;
 
 	ci::audio::BufferInterleaved mBufferInterleaved;
+
+	PureDataPrintReceiver mPdReceiver;
 };
+
 
 } // namespace cipd

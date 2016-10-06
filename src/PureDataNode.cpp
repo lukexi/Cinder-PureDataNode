@@ -7,7 +7,13 @@
 using namespace std;
 using namespace ci;
 
+
+
 namespace cipd {
+
+void PureDataPrintReceiver::print(const std::string& message) {
+	cout << message + "\n";
+};
 
 PureDataNode::PureDataNode( const Format &format )
 	: Node( format )
@@ -34,6 +40,8 @@ void PureDataNode::initialize()
 	bool success = mPdBase.init( getNumChannels(), getNumChannels(), getSampleRate() );
 	CI_ASSERT( success );
 
+	mPdReceiver = PureDataPrintReceiver();
+	mPdBase.setReceiver(&mPdReceiver);
 	// in libpd world, dsp computation is controlled through the process methods, so computeAudio is enabled until uninitialize
 	mPdBase.computeAudio( true );
 }
@@ -61,6 +69,11 @@ void PureDataNode::process( audio::Buffer *buffer )
 		mPdBase.processFloat( mNumTicksPerBlock, buffer->getData(), buffer->getData() );
 		mMutex.unlock();
 	}
+}
+
+void PureDataNode::addToPath( cinder::fs::path path ) {
+	lock_guard<mutex> lock( mMutex );
+	mPdBase.addToSearchPath(path.string());
 }
 
 PatchRef PureDataNode::loadPatch( ci::DataSourceRef dataSource )
